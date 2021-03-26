@@ -31,16 +31,16 @@ router.post('/login', async (req, res) => {
     } else {
         res.json({ error: 'Error en email y/o password' })
     }
-
-})
+});
 
 function createToken(pUser) {
     const data = {
         userId: pUser.id,
-        expire: dayjs().add(15, 'minutes').unix()
+        expire: dayjs().add(1, 'week').unix()
     }
-    return jwt.sign(data, 'clavetoken')
+    return jwt.sign(data, 'clave token');
 }
+
 
 
 module.exports = router;

@@ -1,5 +1,5 @@
 const dayjs = require("dayjs");
-const { jwt } = require("jsonwebtoken");
+const jwt = require("jsonwebtoken");
 
 const checkToken = (req, res, next) => {
 
@@ -24,7 +24,6 @@ const checkToken = (req, res, next) => {
     //userID
 
     req.userId = data.userId;
-
     next()
 }
 
