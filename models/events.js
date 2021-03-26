@@ -9,7 +9,7 @@ const getAll = () => {
 
 const getByHost = (pId) => {
     return new Promise((resolve, reject) => {
-        db.query('SELECT * FROM events WHERE fk_user_host = ? && status = "active" AND date_start > CURRENT_DATE', [pId], (err, rows) => {
+        db.query('SELECT * FROM events WHERE fk_user_host = ? && status = "active" AND date_start > CURRENT_DATE ORDER BY date_start DESC', [pId], (err, rows) => {
             if (err) return reject(err);
             resolve(rows);
         })
@@ -18,7 +18,7 @@ const getByHost = (pId) => {
 
 const getByHostExpired = (pId) => {
     return new Promise((resolve, reject) => {
-        db.query('SELECT * FROM events WHERE fk_user_host = ? && status = "active" AND date_start < CURRENT_DATE', [pId], (err, rows) => {
+        db.query('SELECT * FROM events WHERE fk_user_host = ? && status = "active" AND date_start < CURRENT_DATE ORDER BY date_start DESC', [pId], (err, rows) => {
             if (err) return reject(err);
             resolve(rows);
         })
@@ -27,7 +27,7 @@ const getByHostExpired = (pId) => {
 
 const getByAttend = (pId) => {
     return new Promise((resolve, reject) => {
-        db.query('SELECT e.* FROM events e, user_event_attend ue WHERE ue.fk_event_attend = e.id AND ue.fk_user_attend = ? AND status = "active" AND date_start > CURRENT_DATE;', [pId], (err, rows) => {
+        db.query('SELECT e.* FROM events e, user_event_attend ue WHERE ue.fk_event_attend = e.id AND ue.fk_user_attend = ? AND status = "active" AND date_start > CURRENT_DATE ORDER BY date_start DESC;', [pId], (err, rows) => {
             if (err) return reject(err);
             resolve(rows);
         })
@@ -36,7 +36,7 @@ const getByAttend = (pId) => {
 
 const getByAttendExpired = (pId) => {
     return new Promise((resolve, reject) => {
-        db.query('SELECT e.* FROM events e, user_event_attend ue WHERE ue.fk_event_attend = e.id AND ue.fk_user_attend = ? AND status = "active" AND date_start < CURRENT_DATE;', [pId], (err, rows) => {
+        db.query('SELECT e.* FROM events e, user_event_attend ue WHERE ue.fk_event_attend = e.id AND ue.fk_user_attend = ? AND status = "active" AND date_start < CURRENT_DATE ORDER BY date_start DESC;', [pId], (err, rows) => {
             if (err) return reject(err);
             resolve(rows);
         })
@@ -45,7 +45,7 @@ const getByAttendExpired = (pId) => {
 
 const getByFav = (pId) => {
     return new Promise((resolve, reject) => {
-        db.query('SELECT events.* FROM events JOIN user_event_fav ON events.id = user_event_fav.fk_event_fav JOIN users ON users.id = user_event_fav.fk_user_fav WHERE users.id = ? AND status = "active" AND date_start > CURRENT_DATE;', [pId], (err, rows) => {
+        db.query('SELECT events.* FROM events JOIN user_event_fav ON events.id = user_event_fav.fk_event_fav JOIN users ON users.id = user_event_fav.fk_user_fav WHERE users.id = ? AND status = "active" AND date_start > CURRENT_DATE ORDER BY date_start DESC;', [pId], (err, rows) => {
             if (err) return reject(err);
             resolve(rows);
         })
@@ -54,7 +54,7 @@ const getByFav = (pId) => {
 
 const getByFavExpired = (pId) => {
     return new Promise((resolve, reject) => {
-        db.query('SELECT events.* FROM events JOIN user_event_fav ON events.id = user_event_fav.fk_event_fav JOIN users ON users.id = user_event_fav.fk_user_fav WHERE users.id = ? AND status = "active" AND date_start < CURRENT_DATE;', [pId], (err, rows) => {
+        db.query('SELECT events.* FROM events JOIN user_event_fav ON events.id = user_event_fav.fk_event_fav JOIN users ON users.id = user_event_fav.fk_user_fav WHERE users.id = ? AND status = "active" AND date_start < CURRENT_DATE ORDER BY date_start DESC;', [pId], (err, rows) => {
             if (err) return reject(err);
             resolve(rows);
         })
