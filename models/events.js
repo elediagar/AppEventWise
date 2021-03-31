@@ -7,9 +7,34 @@ const getAll = () => {
     })
 }
 
+// START FILTROS //
+
+const filterGetAll = (categories) => {
+    const values = new Array(categories.length).fill("?");
+    return new Promise((resolve, reject) => {
+        db.query(`SELECT * FROM events WHERE category IN (${values.join(",")})`, categories, (err, rows) => {
+            if (err) return reject(err);
+            resolve(rows);
+        })
+    })
+}
+
+const filterByText = (text) => {
+    return new Promise((resolve, reject) => {
+        db.query(`SELECT * FROM events WHERE name LIKE '%${text}%' OR description_short LIKE '%${text}%' OR company_name LIKE '%${text}%'`, (err, rows) => {
+            if (err) return reject(err);
+            resolve(rows);
+        })
+    })
+}
+
+
+
+// END FILTROS //
+
 const getByHost = (pId) => {
     return new Promise((resolve, reject) => {
-        db.query('SELECT * FROM events WHERE fk_user_host = ? && status = "active" AND date_start > CURRENT_DATE ORDER BY date_start DESC', [pId], (err, rows) => {
+        db.query('SELECT * FROM events WHERE fk_user_host = ? && status = "active" AND date_start >= CURRENT_DATE ORDER BY date_start DESC', [pId], (err, rows) => {
             if (err) return reject(err);
             resolve(rows);
         })
@@ -62,9 +87,9 @@ const getByFavExpired = (pId) => {
 }
 
 
-const create = ({ name, company_name }) => {
+const create = ({ status, name, date_start, date_end, category, company_name, company_sector, modality, address, city, country, description_short, description_long, url_extension, img, room_title1, room_description1, room_link1, room_title2, room_description2, room_link2 }, idHost) => {
     return new Promise((resolve, reject) => {
-        db.query('INSERT INTO events(name, company_name) values(?,?)', [name, company_name], (err, result) => {
+        db.query('INSERT INTO events(status, name, date_start, date_end, category, company_name, company_sector, modality, address, city, country, description_short, description_long, url_extension, img, room_title1, room_description1, room_link1, room_title2, room_description2, room_link2, fk_user_host) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)', [status, name, date_start, date_end, category, company_name, company_sector, modality, address, city, country, description_short, description_long, url_extension, img, room_title1, room_description1, room_link1, room_title2, room_description2, room_link2, idHost], (err, result) => {
             if (err) return reject(err);
             resolve(result)
         })
@@ -81,9 +106,29 @@ const getById = (pId) => {
     })
 }
 
-const updateById = ({ id, name, company_name }) => {
+const getAttendById = (pId) => {
     return new Promise((resolve, reject) => {
-        db.query('UPDATE events SET name = ?, company_name = ? WHERE id = ?', [name, company_name, id], (err, result) => {
+        db.query('SELECT * FROM events WHERE id = ?', [pId], (err, rows) => {
+            if (err) return reject(err);
+            if (rows.length === 0) return resolve(null);
+            resolve(rows[0])
+        })
+    })
+}
+
+const getHostById = (pId) => {
+    return new Promise((resolve, reject) => {
+        db.query('SELECT * FROM events WHERE id = ?', [pId], (err, rows) => {
+            if (err) return reject(err);
+            if (rows.length === 0) return resolve(null);
+            resolve(rows[0])
+        })
+    })
+}
+
+const updateById = ({ name, date_start, date_end, category, company_name, company_sector, modality, address, city, country, description_short, description_long, url_extension, img, room_title1, room_description1, room_link1, room_title2, room_description2, room_link2 }, idEvent) => {
+    return new Promise((resolve, reject) => {
+        db.query('UPDATE events SET status="active", name = ?, date_start = ?, date_end = ?, category = ?, company_name = ?, company_sector = ?, modality = ?, address = ?, city = ?, country = ?, description_short = ?, description_long = ?, url_extension = ?, img = ?, room_title1 = ?, room_description1 = ?, room_link1 = ?, room_title2 = ?, room_description2 = ?, room_link2 = ? WHERE id = ?', [name, date_start, date_end, category, company_name, company_sector, modality, address, city, country, description_short, description_long, url_extension, img, room_title1, room_description1, room_link1, room_title2, room_description2, room_link2, idEvent], (err, result) => {
             if (err) return reject(err);
             resolve(result);
         })
@@ -108,6 +153,7 @@ const addFav = (user_id, event_id) => {
     })
 }
 
+
 const delFav = (user_id, event_id) => {
     return new Promise((resolve, reject) => {
         db.query('DELETE FROM user_event_fav WHERE fk_user_fav = ? AND fk_event_fav = ?', [user_id, event_id], (err, result) => {
@@ -127,6 +173,44 @@ const checkFav = (user_id, event_id) => {
     })
 }
 
+const checkAttend = (user_id, event_id) => {
+    return new Promise((resolve, reject) => {
+        db.query('SELECT * FROM user_event_attend WHERE fk_user_attend = ? AND fk_event_attend = ?', [user_id, event_id], (err, rows) => {
+            if (err) return reject(err);
+            if (rows.length === 0) return resolve(false)
+            resolve(true)
+        })
+    })
+}
+
+const checkHost = (user_id, event_id) => {
+    return new Promise((resolve, reject) => {
+        db.query('SELECT * FROM events WHERE fk_user_host = ? AND id = ?', [user_id, event_id], (err, rows) => {
+            if (err) return reject(err);
+            if (rows.length === 0) return resolve(false)
+            resolve(true)
+        })
+    })
+}
+
+const addAttend = (user_id, event_id) => {
+    return new Promise((resolve, reject) => {
+        db.query('INSERT INTO user_event_attend (fk_user_attend, fk_event_attend) values (?,?)', [user_id, event_id], (err, result) => {
+            if (err) return reject(err);
+            resolve(result)
+        })
+    })
+}
+
+const delAttend = (user_id, event_id) => {
+    return new Promise((resolve, reject) => {
+        db.query('DELETE FROM user_event_attend WHERE fk_user_attend = ? AND fk_event_attend = ?', [user_id, event_id], (err, result) => {
+            if (err) return reject(err);
+            resolve(result)
+        })
+    })
+}
+
 module.exports = {
-    getAll, getByHost, create, getById, updateById, changeStatus, getByAttend, getByFav, addFav, checkFav, delFav, getByHostExpired, getByFavExpired, getByAttendExpired
+    getAll, getByHost, create, getById, updateById, changeStatus, getByAttend, getByFav, addFav, checkFav, delFav, getByHostExpired, getByFavExpired, getByAttendExpired, filterGetAll, addAttend, delAttend, checkAttend, getAttendById, checkHost, getHostById, filterByText
 }
